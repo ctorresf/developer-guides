@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management App</title>
+    <!-- Use Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            @apply bg-gray-100 text-gray-800;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl">
+        <h1 class="text-3xl font-bold text-center mb-6">User Management</h1>
+        
+        <!-- Form to add a new user -->
+        <div class="mb-8 p-6 bg-gray-50 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">Add a New User</h2>
+            <form id="addUserForm" class="space-y-4">
+                <input type="text" id="username" placeholder="Username" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="email" id="email" placeholder="Email" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" 
+                        class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+                    Add User
+                </button>
+            </form>
+        </div>
+
+        <!-- Section to display users -->
+        <div class="p-6 bg-gray-50 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">Existing Users</h2>
+            <div id="loading" class="text-center text-gray-500">Loading users...</div>
+            <table id="userTable" class="w-full table-auto hidden">
+                <thead>
+                    <tr class="bg-gray-200 text-left">
+                        <th class="p-3 rounded-tl-lg">ID</th>
+                        <th class="p-3">Username</th>
+                        <th class="p-3 rounded-tr-lg">Email</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- User rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Link to the JavaScript file -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

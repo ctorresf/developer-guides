@@ -1,0 +1,6 @@
+# Flask is the web framework for the app.
+Flask==3.1.1
+# Flask-SQLAlchemy is an extension for working with databases.
+Flask-SQLAlchemy==3.1.1
+# PyMySQL is a Python driver for MySQL.
+PyMySQL==1.1.1

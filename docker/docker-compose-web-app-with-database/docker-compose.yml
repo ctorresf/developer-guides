@@ -1,0 +1,34 @@
+# Use a newer version of the Docker Compose syntax.
+version: '3.8'
+
+services:
+  # The 'web' service for our Python application.
+  web:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      # Use the mariadb service name as the host, since Docker Compose handles the networking.
+      DATABASE_URL: mysql+pymysql://root:password@db:3306/mydatabase
+    # The app depends on the database service being ready.
+    depends_on:
+      - db
+
+  # The 'db' service for the mariadb database.
+  db:
+    image: bitnami/mariadb:latest
+    container_name: mariadb-db
+    #restart: always
+    environment:
+      # These are required to set up the mariadb database.
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: mydatabase
+    # Use a named volume to persist the database data.
+    # This ensures your data is not lost when the container is stopped or removed.
+    volumes:
+      - db-data:/var/lib/mariadb
+
+# Define the named volume for the database.
+volumes:
+  db-data:
