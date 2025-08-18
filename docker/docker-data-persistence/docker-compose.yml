@@ -1,0 +1,40 @@
+# Docker Compose syntax version.
+version: '3.8'
+
+services:
+  # Defines a service for our web application.
+  web:
+    image: data-persistance-app
+    # Build the image from the Dockerfile in the current directory.
+    build: .
+    # Maps the container port to the host port.
+    ports:
+      - "8010:8010"
+    # Defines the volumes for this service.
+    volumes:
+      # -------------------------------------------------------------
+      # 1. Bind Mount (configuration)
+      # Maps the local './app-config' folder to '/app/config' inside the container.
+      # Changes on your host machine are instantly reflected in the container.
+      # -------------------------------------------------------------
+      - ./app-config:/app/config
+
+      # -------------------------------------------------------------
+      # 2. Named Volume (generated logs/data)
+      # Maps the 'app-logs' volume to '/app/logs' inside the container.
+      # Docker manages the storage of 'app-logs', and the data persists
+      # even if the container is deleted and recreated.
+      # -------------------------------------------------------------
+      - app-logs:/app/logs
+  web_no_mount:
+    # Reuses the previous generated image
+    image: data-persistance-app
+    depends_on:
+    - web
+    ports:
+      - "8011:8010"
+# Define the named volume so Docker Compose knows to create it.
+volumes:
+  app-logs:
+    # You can add a driver if you need advanced storage options.
+    # For now, the default driver is sufficient.

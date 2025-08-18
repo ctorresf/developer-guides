@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    container_name: backend
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    container_name: frontend
+    environment:
+      - BACKEND_HOST=backend:5000
+
+networks:
+  default:
+    name: my_app_network
