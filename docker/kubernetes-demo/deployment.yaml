@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app-container
+        image: docker-simple-python-app:latest # Use the name and tag of your local image
+        imagePullPolicy: Never # Crucial for using local images
+        ports:
+        - containerPort: 8000 # Or your application's port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-entrypoint
+  namespace: default
+spec:
+  type: NodePort
+  # Can be:
+  # NodePort: Exposes the Service on each Node's IP at a static port (the NodePort).
+  # LoadBalancer: expose service externally.
+  # ClusterIP: Exposes the Service on a cluster-internal IP.
+  # ExternalName: Maps the Service to the contents of the externalName field.
+  selector:
+    app: my-app
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30001
+
