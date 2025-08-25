@@ -1,0 +1,41 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "vscode-aws",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	// more images in https://hub.docker.com/r/microsoft/devcontainers
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {"version": "3.12"},
+		"ghcr.io/devcontainers/features/aws-cli:1": {}
+    },
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	 "postCreateCommand": "pip install --no-cache-dir -r requirements.txt",
+
+	// Configure tool-specific properties.
+	"customizations": {
+    "vscode": {
+      "extensions": [
+		"ms-python.python",
+		"njpwerner.autodocstring",
+		"usernamehw.errorlens",
+		"gruntfuggly.todo-tree",
+		"charliermarsh.ruff",
+		"mechatroner.rainbow-csv"
+	],
+	// VSCode configuration settings
+	"settings": {
+	}
+    }
+  },
+  
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
