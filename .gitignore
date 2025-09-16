@@ -214,3 +214,6 @@ __marimo__/
 
 # Thumbnails
 ._*
+
+# Output folders
+output
