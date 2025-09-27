@@ -1,0 +1,144 @@
+version: "1"
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  app:
+    image: 'mcr.microsoft.com/devcontainers/base:bookworm'
+    volumes:
+      # Forwards the local Docker socket to the container.
+      - /var/run/docker.sock:/var/run/docker-host.sock 
+      # Update this to wherever you want VS Code to mount the folder of your project
+      - ../..:/workspaces:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    entrypoint: /usr/local/share/docker-init.sh
+    command: sleep infinity 
+    networks:
+      - app-tier
+
+  # https://github.com/bitnami/containers/tree/main/bitnami/postgresql
+  rhl-postgresql:
+    image: 'postgres:13'
+    ports:
+      - '5432:5432'
+    environment:
+      # POSTGRES_PASSWORD: password-root
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: my_database
+    volumes:
+      - 'postgresql_data:/bitnami/postgresql'
+    networks:
+      - app-tier
+
+  rhl-pgadmin:
+    image: 'dpage/pgadmin4:latest'
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    networks:
+      - app-tier
+
+# https://hub.docker.com/r/minio/minio
+  rhl-minio:
+    image: 'minio/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      - MINIO_ROOT_USER=minio-root-user
+      - MINIO_ROOT_PASSWORD=minio-root-password
+    command: server /data --console-address ":9001"
+    networks:
+      - app-tier
+
+  #https://hub.docker.com/_/redis
+  rhl-redis:
+    image: redis:8.2
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    networks:
+      - app-tier
+
+  rhl-redis-insight:
+    image: redis/redisinsight:latest
+    restart: always
+    ports:
+      - "5540:5540"
+    networks:
+      - app-tier
+
+  # https://github.com/conduktor/kafka-stack-docker-compose/blob/master/zk-single-kafka-single.yml
+  rhl-zookeeper:
+    image: confluentinc/cp-zookeeper:7.8.0
+    hostname: zookeeper
+    container_name: rhl-zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - app-tier
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zookeeper:2888:3888
+
+  rhl-kafka:
+    image: confluentinc/cp-kafka:7.8.0
+    hostname: kafka
+    container_name: rhl-kafka
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9999:9999"
+    networks:
+      - app-tier
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092,DOCKER://host.docker.internal:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+    depends_on:
+      - rhl-zookeeper
+
+  #https://github.com/bitnami/containers/tree/main/bitnami/kafka
+  #https://docs.docker.com/guides/kafka/
+
+  #https://github.com/provectus/kafka-ui/blob/master/documentation/compose/DOCKER_COMPOSE.md
+  rhl-kafka-ui:
+    container_name: rhl-kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    networks:
+      - app-tier
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
+      DYNAMIC_CONFIG_ENABLED: 'true'  # not necessary, added for tests
+      KAFKA_CLUSTERS_0_AUDIT_TOPICAUDITENABLED: 'true'
+      KAFKA_CLUSTERS_0_AUDIT_CONSOLEAUDITENABLED: 'true'
+    depends_on:
+      - rhl-kafka
+volumes:
+  postgresql_data:
+    driver: local
+  kafka_data:
+    driver: local

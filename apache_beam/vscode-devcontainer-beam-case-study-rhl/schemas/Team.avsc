@@ -1,0 +1,47 @@
+{
+  "type": "record",
+  "name": "Team",
+  "doc": "Scheme for racing team information.",
+  "fields": [
+    {
+      "name": "HelicopterID",
+      "type": "string",
+      "doc": "Unique helicopter identifier."
+    },
+    {
+      "name": "TeamName",
+      "type": "string",
+      "doc": "Team name."
+    },
+    {
+      "name": "PilotName",
+      "type": "string",
+      "doc": "Full name of the pilot."
+    },
+    {
+      "name": "Country",
+      "type": "string",
+      "doc": "Country of origin of the team or pilot."
+    },
+    {
+      "name": "AircraftModel",
+      "type": "string",
+      "doc": "Aircraft model."
+    },
+    {
+      "name": "MaxSpeed_km_h",
+      "type": "int",
+      "doc": "Maximum speed in km/h."
+    },
+    {
+      "name": "Endurance_hours",
+      "type": "float",
+      "doc": "Maximum flight duration in hours."
+    },
+    {
+      "name": "Sponsor",
+      "type": "string",
+      "doc": "Main sponsor name."
+    }
+  ]
+}

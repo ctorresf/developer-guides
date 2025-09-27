@@ -1,0 +1,57 @@
+{
+  "type": "record",
+  "name": "HelicopterTelemetry",
+  "doc": "Schematic for helicopter lap telemetry data.",
+  "fields": [
+    {
+      "name": "HelicopterID",
+      "type": "string",
+      "doc": "Unique helicopter identifier."
+    },
+    {
+      "name": "LapNumber",
+      "type": "int",
+      "doc": "Lap number."
+    },
+    {
+      "name": "Time_s",
+      "type": "float",
+      "doc": "Lap time in seconds."
+    },
+    {
+      "name": "Speed_km_h",
+      "type": "float",
+      "doc": "Helicopter speed in km/h."
+    },
+    {
+      "name": "Altitude_m",
+      "type": "float",
+      "doc": "Altitude in meters."
+    },
+    {
+      "name": "FuelLevel_percentage",
+      "type": "float",
+      "doc": "Fuel level in percentage."
+    },
+    {
+      "name": "EngineTemp_c",
+      "type": "int",
+      "doc": "Engine temperature in degrees Celsius."
+    },
+    {
+      "name": "RotorRPM",
+      "type": "int",
+      "doc": "Rotor RPM."
+    },
+    {
+      "name": "Latitude",
+      "type": "double",
+      "doc": "Latitude of the position."
+    },
+    {
+      "name": "Longitude",
+      "type": "double",
+      "doc": "Longitude of the position."
+    }
+  ]
+}

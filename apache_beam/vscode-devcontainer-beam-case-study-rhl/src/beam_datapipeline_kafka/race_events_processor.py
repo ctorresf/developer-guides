@@ -1,0 +1,95 @@
+import argparse
+import logging
+import uuid
+import os
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions, SetupOptions, StandardOptions
+from apache_beam.io.kafka import ReadFromKafka
+from ..utils import utils
+from .. import settings
+
+# Configuración de las variables de entorno para boto3
+# Esto permite que boto3 se conecte a MinIO en lugar de AWS S3
+os.environ['AWS_ACCESS_KEY_ID'] = settings.MINIO_ACCESS_KEY
+os.environ['AWS_SECRET_ACCESS_KEY'] = settings.MINIO_SECRET_KEY
+os.environ['AWS_REGION_NAME'] = 'us-east-1' # La región es arbitraria para MinIO local
+os.environ['AWS_ENDPOINT_URL'] = f"http://{settings.MINIO_ENDPOINT}"
+
+def main(argv=None, save_main_session=True):
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '--output_bucket',
+        required=True,
+        help='')
+    
+    parser.add_argument(
+        '--output_file_prefix',
+        required=True,
+        help='')
+    
+    parser.add_argument(
+        '--input_topic',
+        required=True,
+        help='')
+    
+    parser.add_argument(
+        "--num_records",
+        type=int,
+        default=1,
+        help=""
+    )
+
+    parser.add_argument(
+        '--output_topic',
+        required=True,
+        help='')
+
+    known_args, pipeline_args = parser.parse_known_args(argv)
+    pipeline_options = PipelineOptions(pipeline_args)
+    pipeline_options.view_as(
+        SetupOptions).save_main_session = save_main_session
+    pipeline_options.view_as(StandardOptions).streaming = True
+
+    utils.ensure_minio_bucket_exists(known_args.output_bucket, logging)
+
+    with beam.Pipeline(options=pipeline_options) as p:
+
+        def format_as_json(element):
+            if isinstance(element, tuple):
+                return element[1].decode('utf-8')
+            else:
+                raise RuntimeError('unknown record type: %s' % type(element))
+
+        output_path = f"s3://{known_args.output_bucket}/{known_args.output_file_prefix}"
+        
+        records = (
+            p
+            # Read messages from an Apache Kafka topic.
+            | ReadFromKafka(
+                consumer_config={'bootstrap.servers': settings.KAFKA_BROKERS,
+                                 'auto.offset.reset': 'latest'}, # https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#auto-offset-reset
+                topics=[known_args.input_topic],
+                max_num_records=known_args.num_records  # for testing purposes
+            )
+            | 'FormatOutputToJson' >> beam.Map(format_as_json)
+        )
+        (records
+            # | 'ToJsonString' >> beam.Map(json.dumps)
+            # Subdivide the output into fixed 5-second windows.
+            | beam.WindowInto(beam.window.FixedWindows(5))
+            | beam.io.WriteToText(output_path, file_name_suffix='.json')
+        )
+
+        (records
+         | 'To KVs' >> beam.Map(lambda x: (str(uuid.uuid4()).encode('utf-8'), x.encode('utf-8')))
+         .with_output_types(tuple[bytes, bytes])
+         | beam.io.kafka.WriteToKafka(
+            producer_config={'bootstrap.servers': settings.KAFKA_BROKERS},
+            topic=known_args.output_topic)
+        )
+
+
+if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.INFO)
+    main()

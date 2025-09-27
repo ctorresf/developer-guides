@@ -1,0 +1,12 @@
+fastavro==1.10.0 
+apache-beam==2.65.0
+pyarrow
+pandas==2.2.2
+python-snappy==0.7.3
+confluent-kafka==2.10.0
+minio==7.2.15
+boto3
+Faker
+redis
+psycopg
+psycopg-binary

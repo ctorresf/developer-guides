@@ -1,0 +1,47 @@
+{
+  "type": "record",
+  "name": "RaceEvent",
+  "fields": [
+    {
+      "name": "EventID",
+      "type": "string",
+      "doc": "Unique event identifier."
+    },
+    {
+      "name": "RaceID",
+      "type": "string",
+      "doc": "Race identifier."
+    },
+    {
+      "name": "Timestamp_s",
+      "type": "long",
+      "doc": "Timestamp of the event in seconds."
+    },
+    {
+      "name": "EventType",
+      "type": "string",
+      "doc": "Event type, such as 'Fuel Warning' or 'Sensor Error'."
+    },
+    {
+      "name": "Details",
+      "type": [
+        "string",
+        "null"
+      ],
+      "doc": "Detailed description of the event."
+    },
+    {
+      "name": "HelicopterID",
+      "type": "string",
+      "doc": "Helicopter identifier."
+    },
+    {
+      "name": "Impact",
+      "type": [
+        "string",
+        "null"
+      ],
+      "doc": "Impact or action suggested by the event."
+    }
+  ]
+}
