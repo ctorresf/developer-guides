@@ -1,12 +1,16 @@
 # RHL Data pipelines
 
-## Generate mock data for tests
+## Create a Dag png file
 
-### Local folder
+```
+python <beam_pipeline>.py --runner apache_beam.runners.render.RenderRunner --render_output dag.png
+```
 
+## Create a interactive Dag
 
-### Kafka topic
-
+```
+python <beam_pipeline>.py --runner apache_beam.runners.render.RenderRunner --render_port 8089
+```
 
 ## Run Data pipelines for local files
 
@@ -82,15 +86,24 @@ race_data_joiner_v2.py
 
 ## Run Data pipelines for Kafka topic 
 
-
 ### Consume race data, save it to a Minio bucket, and send it to the telemetry system
-python -m src.beam.race_events_processor \
+python -m src.beam_datapipeline_kafka.race_events_processor \
     --runner PrismRunner  \
     --output_bucket race-event-bucket  \
     --output_file_prefix cup_jun_2025/events/race_events  \
     --num_records 100 \
     --input_topic race_events_topic \
     --output_topic telemetry_events_topic
+
+After run the beam pipeline, you need to create the mock data and send to kafka topic: 
+
+python -m src.generator.generator \
+    --generator_type race_event \
+    --output kafka \
+    --num_teams 10 \
+    --race_id cup_jun_2025 \
+    --num_records 100 \
+    --output_path race_events_topic
 
 ### Create telemetry data and publish to Kafka
 python -m src.generator.generator \
@@ -102,7 +115,7 @@ python -m src.generator.generator \
     --output_path telemetry_topic
 
 ### Consume race event data and telemetry and save locally
-python -m src.beam.telemetry_processor_file \
+python -m src.beam_datapipeline_kafka.telemetry_processor_file \
     --runner PrismRunner  \
     --output_bucket output  \
     --output_file_prefix cup_jun_2025/telemetry/  \
@@ -111,7 +124,7 @@ python -m src.beam.telemetry_processor_file \
     --input_telemetry_topic telemetry_topic 
 
 ### Consume race event data and telemetry and save to bucket
-python -m src.beam.telemetry_processor_file \
+python -m src.beam_datapipeline_kafka.telemetry_processor_file \
     --runner PrismRunner  \
     --output_bucket s3://ai-bucket  \
     --output_file_prefix cup_jun_2025/telemetry/  \
@@ -120,7 +133,7 @@ python -m src.beam.telemetry_processor_file \
     --input_telemetry_topic telemetry_topic 
 
 ## Consumir datos de eventos de carrera y telemetria y guardar en redis y postgresql
-python -m src.beam.telemetry_processor \
+python -m src.beam_datapipeline_kafka.telemetry_processor \
     --runner PrismRunner  \
     --output_bucket s3://ai-bucket  \
     --output_file_prefix cup_jun_2025/telemetry/  \

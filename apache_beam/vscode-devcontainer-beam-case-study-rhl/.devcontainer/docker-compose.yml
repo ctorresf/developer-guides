@@ -41,6 +41,12 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
       PGADMIN_DEFAULT_PASSWORD: strong-password
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json # Specify the path to the JSON file
+    volumes:
+          - ./servers.json:/pgadmin4/servers.json # Mount your local servers.json
+          - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - rhl-postgresql
     networks:
       - app-tier
 
@@ -141,4 +147,6 @@ volumes:
   postgresql_data:
     driver: local
   kafka_data:
+    driver: local
+  pgadmin_data:
     driver: local
