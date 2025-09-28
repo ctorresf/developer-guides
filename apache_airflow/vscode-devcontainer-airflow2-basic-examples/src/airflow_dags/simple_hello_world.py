@@ -10,37 +10,37 @@ from airflow.operators.empty import EmptyOperator
 # 
 
 def greet_message():
-    """Función simple de Python para una tarea."""
-    print("👋 ¡Hola, Airflow! Empezando el pipeline.")
+    """Simple Python function for a task."""
+    print("👋 Hello, Airflow! Starting the pipeline.")
 
 def finish_message():
-    """Función simple para finalizar."""
-    print("✅ ¡DAG completado con éxito!")
+    """Simple function to end."""
+    print("✅ DAG completed successfully!")
 
 with DAG(
     dag_id="simple_hello_world",
     start_date=pendulum.datetime(2025, 9, 27, tz="UTC"),
     schedule=None,
     catchup=False,
-    tags=["basico", "ejemplo"],
+    tags=["essential", "example"],
 ) as dag:
     
-    # 1. Tarea Python usando PythonOperator tradicional
+    # 1. Python task using traditional PythonOperator
     hello_python = PythonOperator(
         task_id="greet_task",
         python_callable=greet_message,
     )
 
-    # 2. Tarea Bash
+    # 2. Bash Task
     goodbye_bash = BashOperator(
         task_id="log_end_of_pipeline",
-        bash_command='echo "--- Ejecutando comando Bash: Airflow es genial. ---"',
+        bash_command='echo "--- Executing Bash command: Airflow is great. ---"',
     )
 
-    # 3. Tarea Vacía (EmptyOperator) para marcar el final
+    # 3. Empty Task (EmptyOperator) to mark the end
     pipeline_finish = EmptyOperator(
         task_id="finish_task"
     )
 
-    # Definición de dependencias
+    # Definition of dependencies
     hello_python >> goodbye_bash >> pipeline_finish

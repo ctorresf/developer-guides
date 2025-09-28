@@ -44,9 +44,6 @@ def run_pipeline(argv=None):
             | 'NormalizeFields' >> beam.ParDo(NormalizeName())
             | 'WriteToVSA' >> beam.io.WriteToCsv(
                 known_args.output, 
-                #file_name_suffix='.csv', 
-                #header=['user_id', 'order_value', 'is_active_flag', 'name', 'country_city_code'], 
-                #num_shards=1 # Escribe un solo archivo
             )
         )
 
