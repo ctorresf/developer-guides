@@ -1,0 +1,43 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "airflow-basics",
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
+	//"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {"version": "3.12"},
+    },
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "bash scripts/install-airflow.sh",
+
+	// Configure tool-specific properties.
+	"customizations": {
+    "vscode": {
+      "extensions": [
+		"yasunari89.avro-viewer",
+		"tgriesser.avro-schemas",
+		"dvirtz.parquet-viewer",
+		"ms-python.python",
+		"njpwerner.autodocstring",
+		"usernamehw.errorlens",
+		"grapecity.gc-excelviewer",
+		"gruntfuggly.todo-tree",
+		"charliermarsh.ruff",
+		"mechatroner.rainbow-csv"
+	],
+	"settings": {
+		"parquet-viewer.backend": "parquet-wasm"
+	}
+    }
+  },
+  
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
