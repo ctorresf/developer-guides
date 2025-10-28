@@ -72,7 +72,7 @@ python src/beam_datapipeline/convert_data_v2_generic.py \
 
 python src/beam_datapipeline/event_team_joiner.py \
  --input_events output/landing_zone/cup/events/*.json \
- --input_teams output/landing_zone/cup/events/*.json\
+ --input_teams output/landing_zone/cup/teams/*.json\
  --output output/golden_zone/events_with_team_data/data 
 
 
