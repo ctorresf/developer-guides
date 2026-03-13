@@ -92,6 +92,8 @@ def get_read_all_func(name):
         return lambda p: pd.read_json(p, lines=True)
     elif 'Avro' in name:
         return lambda p: list(fastavro.reader(open(p, 'rb'))) # only generate list of dicts for Avro to avoid overhead of converting to DataFrame
+        # to convert avro to DataFrame, we would need to do something like:
+        # return lambda p: pd.DataFrame(list(fastavro.reader(open(p, 'rb'))))
     return lambda p: None
 
 results = []
