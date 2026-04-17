@@ -46,25 +46,28 @@ collection.add(
 )
 
 # 4. Problem Solving: Semantic Query
-#query = "What is the trip cancellation policy?"
-#query = "What are the rules for aborting a ride request?"
-#query = "I don't want to go anymore, what happens?"
-#query = "What if I change my mind after the driver was assigned?"
-query = "What is the no-show protocol for passengers?"
+queries = [
+    "What is the trip cancellation policy?",
+    "What are the rules for aborting a ride request?",
+    "I don't want to go anymore, what happens?",
+    "What if I change my mind after the driver was assigned?",
+    "What is the no-show protocol for passengers?"
+]
 
-print(f"\nPerforming a search for: '{query}'")
-results = collection.query(
-    query_texts=[query],
-    n_results=2  # We requested the 2 closest results
-)
+for query in queries:
+    print(f"\nPerforming a search for: '{query}'")
+    results = collection.query(
+        query_texts=[query],
+        n_results=2  # We requested the 2 closest results
+    )
 
-# 5. Show results
-print("\n--- Found Results ---")
-for i in range(len(results['documents'][0])):
-    doc = results['documents'][0][i]
-    distancia = results['distances'][0][i]
-    print(f"Result {i+1} (Distance: {round(distancia, 4)}):")
-    print(f"Content: {doc}\n")
+    # 5. Show results
+    print("\n--- Found Results ---")
+    for i in range(len(results['documents'][0])):
+        doc = results['documents'][0][i]
+        distancia = results['distances'][0][i]
+        print(f"Result {i+1} (Distance: {round(distancia, 4)}):")
+        print(f"Content: {doc}\n")
 
 # --- Embedding Visualization ---
 # We obtain the embedding of the first document (index 0)

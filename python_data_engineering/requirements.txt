@@ -1,5 +1,7 @@
-pandas
-numpy
-pyarrow
-fastavro
-cramjam
+pandas # For data manipulation and analysis
+numpy # For data manipulation and analysis
+pyarrow # For working with Parquet files
+fastavro # For reading and writing Avro files
+cramjam # For compression and decompression of Avro files
+python-dotenv # For loading environment variables from a .env file
+requests # For making HTTP requests to APIs
