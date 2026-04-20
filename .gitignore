@@ -217,3 +217,5 @@ __marimo__/
 
 # Output folders
 output
+/dbt/vscode-devcontainer-dbt/dbt_packages
+dbt/vscode-devcontainer-dbt/package-lock.yml

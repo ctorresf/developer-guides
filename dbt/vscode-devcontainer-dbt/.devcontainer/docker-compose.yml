@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: electric_db
+    restart: always
+    environment:
+      POSTGRES_USER: electric_user
+      POSTGRES_PASSWORD: electric_password
+      POSTGRES_DB: electric_dwh
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: electric_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@my-db.cl
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sleep infinity 
+    volumes:
+      - ..:/workspaces/sandbox-dbt:cached
+    network_mode: service:db # Permite que dbt vea a la DB como 'localhost'
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

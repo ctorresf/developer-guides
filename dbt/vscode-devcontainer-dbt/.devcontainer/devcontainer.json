@@ -1,0 +1,23 @@
+{
+    "name": "dbt & Postgres Environment",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspaces/sandbox-dbt",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "innoverio.vscode-dbt-power-user", 
+                "ms-python.python",
+                "tamasfe.even-better-toml",
+                "dorzey.vscode-sqlfluff",          
+                "mechatroner.rainbow-csv"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "dbt.dbtPythonPath": "/usr/local/bin/python"
+            }
+        }
+    },
+    "postCreateCommand": "pip install -r .devcontainer/requirements.txt",
+    "remoteUser": "vscode"
+}

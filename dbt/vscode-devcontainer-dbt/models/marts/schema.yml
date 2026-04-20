@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: fct_daily_monitoring
+    columns:
+      - name: meter_id
+        tests:
+          - not_null
+      - name: there_was_a_voltage_drop
+        tests:
+          - accepted_values:
+              values: [0, 1]

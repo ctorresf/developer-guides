@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: stg_meters
+    columns:
+      - name: meter_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_category
+        tests:
+          - accepted_values:
+              values: ['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL']
+
+  - name: stg_readings
+    columns:
+      - name: reading_id
+        tests:
+          - unique
+          - not_null
+      - name: voltage
+        tests:
+          - not_null
+      - name: consumption
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0  # Consumption cannot be negative.

@@ -1,0 +1,6 @@
+id_meter,location,customer_type,installation_date
+M-001,Santiago,RESIDENTIAL,2024-01-15
+M-002,Las Condes,INDUSTRIAL,2024-02-10
+M-003,Providencia,RESIDENTIAL,2024-02-20
+M-004,Viña del Mar,COMMERCIAL,2024-03-05
+M-005,Santiago,RESIDENTIAL,2024-03-12

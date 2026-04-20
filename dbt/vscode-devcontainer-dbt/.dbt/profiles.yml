@@ -1,0 +1,12 @@
+electric_project:
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: electric_user
+      pass: electric_password
+      port: 5432
+      dbname: electric_dwh
+      schema: public
+      threads: 4
+  target: dev
