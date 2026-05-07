@@ -1,0 +1,7 @@
+{"truck_id": "T1", "speed": 40, "ts": 1700000000}
+{"truck_id": "T1", "speed": 75, "ts": 1700000003}
+{"truck_id": "T1", "speed": 50, "ts": 1700000008}
+{"truck_id": "T2", "speed": 20, "ts": 1700000001}
+{"truck_id": "T2", "speed": 25, "ts": 1700000006}
+{"truck_id": "T3", "speed": "fast", "ts": 1700000010}
+{"truck_id": "T4", "ts": 1700000012}

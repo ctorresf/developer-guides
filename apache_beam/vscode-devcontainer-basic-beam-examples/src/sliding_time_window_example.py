@@ -1,4 +1,5 @@
 import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.transforms import window
 import datetime
 
@@ -28,7 +29,8 @@ monitoring_data = [
     {'id': 'T-200', 'v': 220, 'ts': '2026-04-03T19:01:25Z'}
 ]
 
-with beam.Pipeline() as p:
+
+with beam.Pipeline(options=PipelineOptions()) as p:
     # 1. Reading and Time Stamping
     stream_data = (
         p | "Sensor Readings" >> beam.Create(monitoring_data)

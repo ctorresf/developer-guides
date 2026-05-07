@@ -1,0 +1,4 @@
+timestamp,store_id,sku,amount_clp
+2026-05-01T11:00:00,ST-010,PROD-X,-50
+2026-05-01T11:05:00,ST-011,PROD-Y,not_a_number
+2026-05-01T11:10:00,ST-012,PROD-Z,20000
