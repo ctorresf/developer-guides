@@ -76,6 +76,26 @@ Build the staging views and the final fact tables:
 dbt run --profiles-dir .dbt
 ```
 
+To build step by step and run the test: 
+```bash
+dbt build --profiles-dir .dbt
+```
+
+Run and test all views in your project:
+```bash
+dbt build --select config.materialized:view --profiles-dir .dbt
+```
+
+Run and test a specific view and its downstream dependencies:
+```bash
+dbt build --select stg_readings+ --profiles-dir .dbt
+```
+
+- +my_viewmodel (Upstream): This command tells dbt to build my_viewmodel and all of its upstream parents (the models, sources, or seeds it depends on).
+- my_viewmodel+: Builds my_viewmodel and all its downstream children (the models that depend on it).
+- +my_viewmodel+: Builds the model, all upstream parents, and all downstream children.
+- +my_viewmodel+5: Limits the graph traversal to only 5 levels up or down, which is helpful for keeping runs fast in massive projects
+
 #### 3. Validate Data Quality
 Run tests to ensure there are no null IDs or invalid sensor values:
 ```bash
