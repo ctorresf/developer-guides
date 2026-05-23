@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: silver_layer
+    schema: silver
+    tables:
+      - name: ventas_consolidadas
+
+models:
+  - name: kpi_finance_report
+    description: "Reporte consolidado mensual de KPIs financieros por región para Global-Mart."
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: ingresos_totales
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"

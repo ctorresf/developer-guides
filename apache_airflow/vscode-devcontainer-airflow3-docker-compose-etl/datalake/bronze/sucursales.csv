@@ -1,0 +1,5 @@
+sucursal_id,estado_sucursal,region
+SUC_SANTIAGO_01,OPERATIVO,Metropolitana
+SUC_VALPO_02,CRITICO,Valparaiso
+SUC_CONCE_03,OPERATIVO,Biobio
+SUC_ANTOF_04,CERRADO,Antofagasta

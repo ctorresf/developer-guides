@@ -1,0 +1,13 @@
+name: 'global_mart_project'
+version: '1.0.0'
+config-version: 2
+
+profile: 'global_mart_project'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+models:
+  global_mart_project:
+    finance:
+      materialized: table # Materializa los KPIs como tablas físicas en PostgreSQL

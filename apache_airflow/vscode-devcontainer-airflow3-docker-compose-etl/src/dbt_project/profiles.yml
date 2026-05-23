@@ -1,0 +1,12 @@
+global_mart_project:
+  outputs:
+    dev:
+      type: postgres
+      host: db
+      user: my_user
+      password: my_password
+      port: 5432
+      dbname: my_dwh
+      schema: gold
+      threads: 4
+  target: dev

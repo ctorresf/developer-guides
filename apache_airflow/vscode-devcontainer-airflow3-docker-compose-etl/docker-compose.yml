@@ -1,0 +1,73 @@
+version: "2"
+
+services:
+  db:
+    build:
+      context: ./services/custom-postgres
+      dockerfile: Dockerfile
+    image: local_pg_with_parquet/postgres:local
+    restart: always
+    environment:
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+      POSTGRES_DB: my_dwh
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./datalake:/datalake
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@my-db.cl
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+    ports:
+      - "8080:80"
+    volumes:
+      - ./services/pg_admin/servers.json:/pgadmin4/servers.json
+    depends_on:
+      - db
+
+  # https://hub.docker.com/r/apache/airflow/tags
+  airflow3:
+    image: 'apache/airflow:3.2.1-python3.13'
+    ports:
+      - '8090:8080' # 'HOST_PORT:CONTAINER_PORT'
+    command: standalone
+    environment: #https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#docker-compose-env-variables
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: True
+      _PIP_ADDITIONAL_REQUIREMENTS: astronomer-cosmos==1.14.2 dbt-core==1.11.11 dbt-postgres==1.10.0 apache-beam[gcp]==2.73.0 apache-airflow-providers-postgres
+      # Define a connection for the filesystem (fs) to allow Airflow tasks to read/write from the mounted data directory
+      AIRFLOW_CONN_FS_DEFAULT: '{"conn_type": "fs","extra": {"path": "/opt/airflow/data/"}}'
+      # Define a connection for Postgres to allow Airflow tasks to connect to the database using the same credentials as dbt
+      AIRFLOW_CONN_POSTGRES_DB: |
+        {"conn_type": "postgres","login": "my_user","password": "my_password","host": "db","port": 5432,"schema": "my_dwh"}
+    volumes:
+      - ./src/dags:/opt/airflow/dags # Mounts your local 'dags' folder to the container's '/opt/airflow/dags'
+      - ./src/beam:/opt/airflow/beam
+      - ./src/dbt_project:/sources/dbt_project
+      - ./datalake:/opt/airflow/data # Mounts datalake data folder to the container for easy access by Airflow tasks
+    #command: bash -c "airflow db migrate && airflow users create --username admin --password admin --firstname Data --lastname Engineer --role Admin --email admin@example.com && airflow webserver & airflow scheduler"
+    depends_on:
+      - db
+
+  ws-app:
+    image: 'mcr.microsoft.com/devcontainers/base:trixie'
+    volumes:
+      # Forwards the local Docker socket to the container.
+      - /var/run/docker.sock:/var/run/docker-host.sock 
+      # Update this to wherever you want VS Code to mount the folder of your project
+      - ../:/workspaces:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    entrypoint: /usr/local/share/docker-init.sh
+    command: sleep infinity 
+    depends_on:
+      - db
+      - airflow3
+
+      
+volumes:
+  postgres_data:
