@@ -1,0 +1,2 @@
+{"tx_id": "BA-552", "ciudad": "BsAs_Erronea", "monto": -500, "motivo": "Ciudad no autorizada o monto menor a cero"}
+{"tx_id": "BA-553", "ciudad": "Buenos Aires", "monto": "NULO_ERROR", "motivo": "Monto no corresponde a formato numerico"}
