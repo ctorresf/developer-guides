@@ -1,0 +1,5 @@
+currency,rate_to_usd,description
+CLP,0.0011,Peso Chileno a Dólar
+PEN,0.27,Sol Peruano a Dólar
+ARS,0.001,Peso Argentino a Dólar
+USD,1.0,Dólar Estadounidense (Base)

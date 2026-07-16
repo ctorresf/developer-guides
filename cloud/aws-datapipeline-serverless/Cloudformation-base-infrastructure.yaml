@@ -1,0 +1,174 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Plantilla CloudFormation para provisionar el entorno analitico del Data Lake (S3, Glue DB y Tablas de Ingesta)'
+
+Parameters:
+  BucketSuffix:
+    Type: String
+    Default: dev
+    Description: Sufijo unico para evitar colisiones globales en los nombres de buckets S3.
+    MinLength: 3
+    MaxLength: 50
+    AllowedPattern: '^[a-z0-9-]+$'
+    ConstraintDescription: El sufijo debe contener solo letras minusculas, numeros y guiones.
+
+Resources:
+
+  # 1. BUCKET DE INGESTA (RAW / BRONCE ZONE)
+  S3RawBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'latambuy-data-lake-raw-${BucketSuffix}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # 2. BUCKET DE DESTINO OPTIMIZADO (TRUSTED / SILVER ZONE)
+  S3TrustedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'latambuy-data-lake-trusted-${BucketSuffix}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # 3. BUCKET TECNICO PARA STAGING Y RESULTADOS DE AMAZON ATHENA
+  S3AthenaStagingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'latambuy-data-lake-athena-staging-${BucketSuffix}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # 4. AWS GLUE DATA CATALOG DATABASE
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: db_latambuy
+        Description: Base de datos logica para la gobernanza del Data Lake de LatamBuy.
+
+  # 5. TABLA EXTERNA DE VENTAS CRUDAS (INGESTA DESDE FILIALES)
+  GlueTableVentasRaw:
+    Type: AWS::Glue::Table
+    DependsOn: GlueDatabase
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: db_latambuy
+      TableInput:
+        Name: ventas_raw
+        Description: Tabla externa para mapear los archivos CSV de ventas mensuales de las filiales.
+        TableType: EXTERNAL_TABLE
+        Parameters:
+          classification: csv
+          typeOfData: file
+        PartitionKeys:
+          - Name: year
+            Type: string
+          - Name: month
+            Type: string
+          - Name: day
+            Type: string
+        StorageDescriptor:
+          Location: !Sub 's3://latambuy-data-lake-raw-${BucketSuffix}/ventas/'
+          InputFormat: org.apache.hadoop.mapred.TextInputFormat
+          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          SerdeInfo:
+            SerializationLibrary: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
+            Parameters:
+              field.delim: ','
+              serialization.format: ','
+          Parameters:
+            skip.header.line.count: '1'
+          Columns:
+            - Name: transaction_id
+              Type: string
+            - Name: date
+              Type: string
+            - Name: product_id
+              Type: string
+            - Name: product_name
+              Type: string
+            - Name: category
+              Type: string
+            - Name: quantity
+              Type: bigint
+            - Name: unit_price
+              Type: double
+            - Name: total_amount
+              Type: double
+            - Name: currency
+              Type: string
+
+  # 6. TABLA EXTERNA DE TIPO DE CAMBIO (DIMENSION PARAMETRICA)
+  GlueTableTipoCambio:
+    Type: AWS::Glue::Table
+    DependsOn: GlueDatabase
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: db_latambuy
+      TableInput:
+        Name: tipo_cambio
+        Description: Tabla de dimension externa que registra las tasas diarias de cambio frente al USD.
+        TableType: EXTERNAL_TABLE
+        Parameters:
+          classification: csv
+          typeOfData: file
+        PartitionKeys:
+          - Name: year
+            Type: string
+          - Name: month
+            Type: string
+          - Name: day
+            Type: string
+        StorageDescriptor:
+          Location: !Sub 's3://latambuy-data-lake-raw-${BucketSuffix}/tipo_cambio/'
+          InputFormat: org.apache.hadoop.mapred.TextInputFormat
+          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          SerdeInfo:
+            SerializationLibrary: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
+            Parameters:
+              field.delim: ','
+              serialization.format: ','
+          Parameters:
+            skip.header.line.count: '1'
+          Columns:
+            - Name: currency
+              Type: string
+            - Name: rate_to_usd
+              Type: double
+            - Name: description
+              Type: string
+
+Outputs:
+  RawBucketName:
+    Value: !Ref S3RawBucket
+    Description: Nombre fisico del bucket S3 Raw para la ingesta de archivos.
+  TrustedBucketName:
+    Value: !Ref S3TrustedBucket
+    Description: Nombre fisico del bucket S3 Trusted para las salidas de Athena CTAS en Parquet.
+  AthenaStagingBucketName:
+    Value: !Ref S3AthenaStagingBucket
+    Description: Nombre fisico del bucket tecnico para almacenar resultados temporales de consulta en Athena.
+  GlueDatabaseName:
+    Value: db_latambuy
+    Description: Nombre de la base de datos de AWS Glue Catalog creada.
