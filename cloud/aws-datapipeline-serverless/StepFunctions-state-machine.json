@@ -13,7 +13,7 @@
                     "OutputLocation.$": "States.Format('s3://latambuy-data-lake-athena-staging-{}/', $.bucket_suffix)"
                 }
             },
-            "Next": "RegistrarParticionesRaw",
+            "Next": "RegistrarParticionesVentasRaw",
             "Catch": [
                 {
                     "ErrorEquals": [
@@ -23,12 +23,33 @@
                 }
             ]
         },
-        "RegistrarParticionesRaw": {
+        "RegistrarParticionesVentasRaw": {
             "Type": "Task",
             "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
             "ResultPath": null,
             "Parameters": {
                 "QueryString": "MSCK REPAIR TABLE db_latambuy.ventas_raw;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                    "OutputLocation.$": "States.Format('s3://latambuy-data-lake-athena-staging-{}/', $.bucket_suffix)"
+                }
+            },
+            "Next": "RegistrarParticionesTipoCambio",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.ALL"
+                    ],
+                    "Next": "NotificarFalloPipeline"
+                }
+            ]
+        },
+        "RegistrarParticionesTipoCambio": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+            "ResultPath": null,
+            "Parameters": {
+                "QueryString": "MSCK REPAIR TABLE db_latambuy.tipo_cambio;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
                     "OutputLocation.$": "States.Format('s3://latambuy-data-lake-athena-staging-{}/', $.bucket_suffix)"
@@ -49,7 +70,7 @@
             "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
             "ResultPath": null,
             "Parameters": {
-                "QueryString.$": "States.Format('CREATE TABLE db_latambuy.ventas_consolidadas_{} WITH (format = \\'PARQUET\\', write_compression = \\'SNAPPY\\', external_location = \\'s3://latambuy-data-lake-trusted-{}/ventas_consolidadas/\\') AS SELECT v.transaction_id, CAST(v.date AS DATE) as fecha_utc, v.product_id, v.product_name, v.category, v.quantity, v.total_amount as monto_moneda_local, v.currency, ROUND(v.total_amount * tc.rate_to_usd, 2) as monto_usd FROM db_latambuy.ventas_raw v INNER JOIN db_latambuy.tipo_cambio tc ON v.currency = tc.currency AND v.year = tc.year AND v.month = tc.month AND v.day = tc.day WHERE v.year = \\'{}\\' AND v.month = \\'{}\\' AND v.day = \\'{}\\';', $.bucket_suffix, $.bucket_suffix, $.year, $.month, $.day)",
+                "QueryString.$": "States.Format('CREATE TABLE db_latambuy.ventas_consolidadas_{} WITH (table_type = \\'iceberg\\', format = \\'PARQUET\\', write_compression = \\'SNAPPY\\', location = \\'s3://latambuy-data-lake-trusted-{}/ventas_consolidadas/\\', is_external=false) AS SELECT v.transaction_id, v.date, v.product_id, v.product_name, v.category, v.quantity, v.total_amount as monto_moneda_local, v.currency, ROUND(v.total_amount * tc.rate_to_usd, 2) as monto_usd FROM db_latambuy.ventas_raw v INNER JOIN db_latambuy.tipo_cambio tc ON v.currency = tc.currency AND v.year = tc.year AND v.month = tc.month AND v.day = tc.day WHERE v.year = \\'{}\\' AND v.month = \\'{}\\' AND v.day = \\'{}\\';', $.bucket_suffix, $.bucket_suffix, $.year, $.month, $.day)",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
                     "OutputLocation.$": "States.Format('s3://latambuy-data-lake-athena-staging-{}/', $.bucket_suffix)"

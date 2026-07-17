@@ -35,9 +35,9 @@ EXCHANGE_RATE_PATH="s3://${BUCKET_NAME}/tipo_cambio/year=${YEAR}/month=${MONTH}/
 
 # 4. Upload files to S3
 echo "🚀 Uploading sales transactions to S3..."
-aws s3 cp sales*.csv "${SALES_PATH}"
+aws s3 cp data/ "${SALES_PATH}" --recursive --exclude "*" --include "sales*.csv"
 
-echo "💵 Uploading exchange rates to S3..."
-aws s3 cp exchange_rate*.csv "${EXCHANGE_RATE_PATH}exchange_rate.csv"
+echo "💵 Uploading exchange rate to S3..."
+aws s3 cp data/exchange_rate*.csv "${EXCHANGE_RATE_PATH}exchange_rate.csv"
 
 echo "✅ Ingestion completed successfully."
