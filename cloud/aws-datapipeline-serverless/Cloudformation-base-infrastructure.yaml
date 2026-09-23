@@ -97,8 +97,7 @@ Resources:
             Parameters:
               field.delim: ','
               serialization.format: ','
-          Parameters:
-            skip.header.line.count: '1'
+              skip.header.line.count: '1'
           Columns:
             - Name: transaction_id
               Type: string
@@ -149,8 +148,7 @@ Resources:
             Parameters:
               field.delim: ','
               serialization.format: ','
-          Parameters:
-            skip.header.line.count: '1'
+              skip.header.line.count: '1'
           Columns:
             - Name: currency
               Type: string
