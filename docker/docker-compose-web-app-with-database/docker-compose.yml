@@ -17,7 +17,7 @@ services:
 
   # The 'db' service for the mariadb database.
   db:
-    image: bitnami/mariadb:latest
+    image: soldevelo/mariadb:latest
     container_name: mariadb-db
     #restart: always
     environment:
